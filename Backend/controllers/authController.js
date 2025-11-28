@@ -9,21 +9,17 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register user (First super admin only)
-// @route   POST /api/auth/register
-// @access  Public (only if no users exist)
 exports.register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     // Check if any users exist
     const userCount = await User.countDocuments();
     
-    if (userCount > 0) {
-      return res.status(403).json({
-        success: false,
-        message: 'Registration is closed. Contact administrator.'
-      });
+    // First user must be superadmin
+    let userRole = role || 'agent';
+    if (userCount === 0) {
+      userRole = 'superadmin';
     }
 
     // Check if user already exists
@@ -35,12 +31,12 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Create first user as super admin
+    // Create user with specified role
     const user = await User.create({
       name,
       email,
       password,
-      role: 'superadmin'
+      role: userRole
     });
 
     // Log activity
@@ -73,9 +69,6 @@ exports.register = async (req, res) => {
   }
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -146,9 +139,6 @@ exports.login = async (req, res) => {
   }
 };
 
-// @desc    Get current logged in user
-// @route   GET /api/auth/me
-// @access  Private
 exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -170,9 +160,6 @@ exports.getMe = async (req, res) => {
   }
 };
 
-// @desc    Logout user
-// @route   POST /api/auth/logout
-// @access  Private
 exports.logout = async (req, res) => {
   try {
     // Log activity

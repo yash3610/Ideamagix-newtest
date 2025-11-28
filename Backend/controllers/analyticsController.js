@@ -2,14 +2,11 @@ const Lead = require('../models/Lead');
 const User = require('../models/User');
 const ActivityLog = require('../models/ActivityLog');
 
-// @desc    Get dashboard statistics
-// @route   GET /api/analytics/dashboard
-// @access  Private
 exports.getDashboardStats = async (req, res) => {
   try {
     const stats = {};
 
-    // For agents, show only their stats
+    // For agents
     const isAgent = req.user.role === 'agent';
     const agentFilter = isAgent ? { assignedTo: req.user._id } : {};
 
@@ -39,7 +36,7 @@ exports.getDashboardStats = async (req, res) => {
       stats.leadsByStatus[item._id] = item.count;
     });
 
-    // Recent leads (last 30 days)
+    // Recent leads
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -89,9 +86,6 @@ exports.getDashboardStats = async (req, res) => {
   }
 };
 
-// @desc    Get lead status distribution
-// @route   GET /api/analytics/lead-status-distribution
-// @access  Private
 exports.getLeadStatusDistribution = async (req, res) => {
   try {
     const isAgent = req.user.role === 'agent';
@@ -126,9 +120,6 @@ exports.getLeadStatusDistribution = async (req, res) => {
   }
 };
 
-// @desc    Get agent performance metrics
-// @route   GET /api/analytics/agent-performance
-// @access  Private (Admin only)
 exports.getAgentPerformance = async (req, res) => {
   try {
     const agents = await User.find({ 
@@ -194,9 +185,6 @@ exports.getAgentPerformance = async (req, res) => {
   }
 };
 
-// @desc    Get recent activity log
-// @route   GET /api/analytics/recent-activity
-// @access  Private
 exports.getRecentActivity = async (req, res) => {
   try {
     const { limit = 20 } = req.query;
@@ -223,9 +211,6 @@ exports.getRecentActivity = async (req, res) => {
   }
 };
 
-// @desc    Get leads created over time
-// @route   GET /api/analytics/leads-over-time
-// @access  Private
 exports.getLeadsOverTime = async (req, res) => {
   try {
     const { period = '30' } = req.query; // days
@@ -276,9 +261,6 @@ exports.getLeadsOverTime = async (req, res) => {
   }
 };
 
-// @desc    Get top tags
-// @route   GET /api/analytics/top-tags
-// @access  Private
 exports.getTopTags = async (req, res) => {
   try {
     const { limit = 10 } = req.query;

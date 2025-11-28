@@ -2,9 +2,6 @@ const XLSX = require('xlsx');
 const Lead = require('../models/Lead');
 const ActivityLog = require('../models/ActivityLog');
 
-// @desc    Import leads from Excel file
-// @route   POST /api/leads/import
-// @access  Private (Admin only)
 exports.importLeads = async (req, res) => {
   try {
     if (!req.file) {
@@ -13,13 +10,7 @@ exports.importLeads = async (req, res) => {
         message: 'Please upload an Excel file'
       });
     }
-
-    // Read the Excel file
-    const workbook = XLSX.readFile(req.file.path);
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json(worksheet);
-
+    
     if (data.length === 0) {
       return res.status(400).json({
         success: false,
@@ -30,12 +21,10 @@ exports.importLeads = async (req, res) => {
     const leads = [];
     const errors = [];
 
-    // Process each row
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
       
       try {
-        // Validate required fields
         if (!row.name || !row.email || !row.phone || !row.source) {
           errors.push({
             row: i + 2, // +2 because Excel rows start at 1 and first row is header
@@ -96,9 +85,6 @@ exports.importLeads = async (req, res) => {
   }
 };
 
-// @desc    Export leads to Excel
-// @route   GET /api/leads/export
-// @access  Private
 exports.exportLeads = async (req, res) => {
   try {
     const {
@@ -111,12 +97,10 @@ exports.exportLeads = async (req, res) => {
 
     let query = {};
 
-    // For agents, only export their assigned leads
     if (req.user.role === 'agent') {
       query.assignedTo = req.user._id;
     }
 
-    // Apply filters
     if (status) query.status = status;
     if (tags) {
       const tagArray = tags.split(',').map(tag => tag.trim());
@@ -136,20 +120,7 @@ exports.exportLeads = async (req, res) => {
       .populate('assignedTo', 'name email')
       .populate('createdBy', 'name email')
       .sort({ createdAt: -1 });
-
-    // Prepare data for Excel
-    const excelData = leads.map(lead => ({
-      'Name': lead.name,
-      'Email': lead.email,
-      'Phone': lead.phone,
-      'Source': lead.source,
-      'Status': lead.status,
-      'Tags': lead.tags.join(', '),
-      'Assigned To': lead.assignedTo ? lead.assignedTo.name : 'Unassigned',
-      'Created By': lead.createdBy ? lead.createdBy.name : 'N/A',
-      'Created At': new Date(lead.createdAt).toLocaleString(),
-      'Updated At': new Date(lead.updatedAt).toLocaleString()
-    }));
+    
 
     // Create workbook and worksheet
     const wb = XLSX.utils.book_new();

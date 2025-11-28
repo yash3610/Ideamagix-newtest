@@ -166,6 +166,7 @@ const UserList = () => {
                   <th>Created By</th>
                   <th>Created At</th>
                   <th>Actions</th>
+                  <th>Action2</th>
                 </tr>
               </thead>
               <tbody>

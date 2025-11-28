@@ -35,8 +35,7 @@ const LeadList = () => {
     loadAllTags();
     if (isAdmin()) {
       loadAgents();
-    }
-  }, [filters]);
+    } }, [filters]);
 
   const loadLeads = async () => {
     try {
@@ -209,6 +208,8 @@ const LeadList = () => {
         </div>
       </div>
 
+
+
       {/* Filters */}
       <div className="card filters-section">
         <div className="filters-grid">
@@ -306,6 +307,7 @@ const LeadList = () => {
                     <th>Assigned To</th>
                     <th>Created</th>
                     <th>Actions</th>
+                   <th>Notes All</th> 
                   </tr>
                 </thead>
                 <tbody>
@@ -377,7 +379,7 @@ const LeadList = () => {
                 disabled={pagination.page === pagination.pages}
                 className="btn btn-secondary btn-small"
               >
-                Next
+                Next Page
               </button>
             </div>
           </>

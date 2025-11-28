@@ -1,9 +1,6 @@
 const Lead = require('../models/Lead');
 const ActivityLog = require('../models/ActivityLog');
 
-// @desc    Get all leads with filters
-// @route   GET /api/leads
-// @access  Private
 exports.getLeads = async (req, res) => {
   try {
     const {
@@ -87,9 +84,6 @@ exports.getLeads = async (req, res) => {
   }
 };
 
-// @desc    Get single lead
-// @route   GET /api/leads/:id
-// @access  Private
 exports.getLead = async (req, res) => {
   try {
     const lead = await Lead.findById(req.params.id)
@@ -104,7 +98,6 @@ exports.getLead = async (req, res) => {
       });
     }
 
-    // Check if agent is authorized to view this lead
     if (req.user.role === 'agent' && 
         lead.assignedTo && 
         lead.assignedTo._id.toString() !== req.user._id.toString()) {
@@ -126,9 +119,6 @@ exports.getLead = async (req, res) => {
   }
 };
 
-// @desc    Create new lead
-// @route   POST /api/leads
-// @access  Private (Admin only)
 exports.createLead = async (req, res) => {
   try {
     const { name, email, phone, source, status, tags, assignedTo } = req.body;
@@ -170,9 +160,6 @@ exports.createLead = async (req, res) => {
   }
 };
 
-// @desc    Update lead
-// @route   PUT /api/leads/:id
-// @access  Private
 exports.updateLead = async (req, res) => {
   try {
     let lead = await Lead.findById(req.params.id);
@@ -238,9 +225,6 @@ exports.updateLead = async (req, res) => {
   }
 };
 
-// @desc    Delete lead
-// @route   DELETE /api/leads/:id
-// @access  Private (Admin only)
 exports.deleteLead = async (req, res) => {
   try {
     const lead = await Lead.findById(req.params.id);
@@ -276,9 +260,6 @@ exports.deleteLead = async (req, res) => {
   }
 };
 
-// @desc    Add note to lead
-// @route   POST /api/leads/:id/notes
-// @access  Private
 exports.addNote = async (req, res) => {
   try {
     const { content } = req.body;
@@ -335,9 +316,6 @@ exports.addNote = async (req, res) => {
   }
 };
 
-// @desc    Update note
-// @route   PUT /api/leads/:id/notes/:noteId
-// @access  Private
 exports.updateNote = async (req, res) => {
   try {
     const { content } = req.body;
@@ -386,9 +364,6 @@ exports.updateNote = async (req, res) => {
   }
 };
 
-// @desc    Delete note
-// @route   DELETE /api/leads/:id/notes/:noteId
-// @access  Private
 exports.deleteNote = async (req, res) => {
   try {
     const lead = await Lead.findById(req.params.id);
@@ -433,9 +408,7 @@ exports.deleteNote = async (req, res) => {
   }
 };
 
-// @desc    Get all unique tags
-// @route   GET /api/leads/tags/all
-// @access  Private
+
 exports.getAllTags = async (req, res) => {
   try {
     const tags = await Lead.distinct('tags');

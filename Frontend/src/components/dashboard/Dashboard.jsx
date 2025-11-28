@@ -35,25 +35,20 @@ const Dashboard = () => {
       const statsRes = await analyticsAPI.getDashboard();
       setStats(statsRes.data.data);
 
-      // Load status distribution
       const statusRes = await analyticsAPI.getLeadStatusDistribution();
       setStatusDistribution(statusRes.data.data);
 
-      // Load agent performance (admin only)
       if (isAdmin()) {
         const agentRes = await analyticsAPI.getAgentPerformance();
         setAgentPerformance(agentRes.data.data);
       }
 
-      // Load recent activity
       const activityRes = await analyticsAPI.getRecentActivity({ limit: 10 });
       setRecentActivity(activityRes.data.data);
 
-      // Load leads over time
       const timeRes = await analyticsAPI.getLeadsOverTime({ period: 30 });
       setLeadsOverTime(timeRes.data.data);
 
-      // Load top tags
       const tagsRes = await analyticsAPI.getTopTags({ limit: 10 });
       setTopTags(tagsRes.data.data);
 
@@ -64,11 +59,10 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
-
   if (loading) {
-    return <div className="loading">Loading dashboard...</div>;
+    return <div className="dashboard-container">Loading...</div>;
   }
-
+  
   return (
     <div className="dashboard-container">
       <h1>Dashboard</h1>
@@ -119,7 +113,7 @@ const Dashboard = () => {
 
       {/* Charts Grid */}
       <div className="charts-grid">
-        {/* Lead Status Distribution */}
+
         <div className="card chart-card">
           <h3>Lead Status Distribution</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -143,7 +137,6 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Leads Over Time */}
         <div className="card chart-card">
           <h3>Leads Over Time (Last 30 Days)</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -158,7 +151,6 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Top Tags */}
         <div className="card chart-card">
           <h3>Top Tags</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -173,7 +165,6 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Agent Performance (Admin only) */}
         {isAdmin() && agentPerformance.length > 0 && (
           <div className="card chart-card">
             <h3>Agent Performance</h3>
@@ -204,13 +195,7 @@ const Dashboard = () => {
           ) : (
             recentActivity.map((activity, index) => (
               <div key={index} className="activity-item">
-                <div className="activity-icon">
-                  {activity.action.includes('CREATE') && '➕'}
-                  {activity.action.includes('UPDATE') && '✏️'}
-                  {activity.action.includes('DELETE') && '🗑️'}
-                  {activity.action.includes('LOGIN') && '🔐'}
-                  {activity.action.includes('LOGOUT') && '🚪'}
-                </div>
+                
                 <div className="activity-content">
                   <p className="activity-text">
                     <strong>{activity.user?.name}</strong> {activity.details}

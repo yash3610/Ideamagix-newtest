@@ -10,6 +10,7 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    role: 'superadmin',
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ const Register = () => {
 
     setLoading(true);
 
-    const result = await register(formData.name, formData.email, formData.password);
+    const result = await register(formData.name, formData.email, formData.password, formData.role);
 
     if (result.success) {
       toast.success('Registration successful!');
@@ -52,9 +53,24 @@ const Register = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>Register Super Admin</h2>
-        <p className="auth-note">Only available for the first user (Super Admin)</p>
+        <h2>Register User</h2>
+        <p className="auth-note">Create a new account</p>
         <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="role">Role</label>
+            <select
+              id="role"
+              name="role"
+              className="form-control"
+              value={formData.role}
+              onChange={handleChange}
+              required
+            >
+              <option value="superadmin">Super Admin</option>
+              <option value="subadmin">Sub Admin</option>
+              <option value="agent">Agent</option>
+            </select>
+          </div>
           <div className="form-group">
             <label htmlFor="name">Full Name</label>
             <input
