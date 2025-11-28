@@ -47,6 +47,11 @@ const LeadModal = ({ lead, agents, onClose }) => {
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
       };
 
+      // Remove assignedTo if it's empty string (Unassigned)
+      if (submitData.assignedTo === '') {
+        delete submitData.assignedTo;
+      }
+
       if (lead) {
         await leadAPI.update(lead._id, submitData);
         toast.success('Lead updated successfully');

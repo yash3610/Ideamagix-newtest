@@ -17,12 +17,20 @@ const UserList = () => {
 
   useEffect(() => {
     loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const response = await userAPI.getAll(filters);
+      // Only send non-empty filters to the API
+      const activeFilters = Object.keys(filters).reduce((acc, key) => {
+        if (filters[key] !== '') {
+          acc[key] = filters[key];
+        }
+        return acc;
+      }, {});
+      const response = await userAPI.getAll(activeFilters);
       setUsers(response.data.data);
     } catch (error) {
       toast.error('Failed to load users');

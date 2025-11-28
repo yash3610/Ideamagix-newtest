@@ -10,7 +10,13 @@ exports.importLeads = async (req, res) => {
         message: 'Please upload an Excel file'
       });
     }
-    
+
+    // Read the Excel file
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet);
+
     if (data.length === 0) {
       return res.status(400).json({
         success: false,
@@ -120,7 +126,20 @@ exports.exportLeads = async (req, res) => {
       .populate('assignedTo', 'name email')
       .populate('createdBy', 'name email')
       .sort({ createdAt: -1 });
-    
+
+    // Prepare data for Excel
+    const excelData = leads.map(lead => ({
+      'Name': lead.name,
+      'Email': lead.email,
+      'Phone': lead.phone,
+      'Source': lead.source,
+      'Status': lead.status,
+      'Tags': lead.tags.join(', '),
+      'Assigned To': lead.assignedTo ? lead.assignedTo.name : 'Unassigned',
+      'Created By': lead.createdBy ? lead.createdBy.name : 'N/A',
+      'Created At': new Date(lead.createdAt).toLocaleString(),
+      'Updated At': new Date(lead.updatedAt).toLocaleString()
+    }));
 
     // Create workbook and worksheet
     const wb = XLSX.utils.book_new();

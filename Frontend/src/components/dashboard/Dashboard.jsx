@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { analyticsAPI } from '../../services/api';
+import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
@@ -14,13 +14,8 @@ const COLORS = {
 };
 
 const Dashboard = () => {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const [stats, setStats] = useState(null);
-  const [statusDistribution, setStatusDistribution] = useState([]);
-  const [agentPerformance, setAgentPerformance] = useState([]);
-  const [recentActivity, setRecentActivity] = useState([]);
-  const [leadsOverTime, setLeadsOverTime] = useState([]);
-  const [topTags, setTopTags] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,28 +25,11 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-
-      // Load dashboard stats
-      const statsRes = await analyticsAPI.getDashboard();
-      setStats(statsRes.data.data);
-
-      const statusRes = await analyticsAPI.getLeadStatusDistribution();
-      setStatusDistribution(statusRes.data.data);
-
-      if (isAdmin()) {
-        const agentRes = await analyticsAPI.getAgentPerformance();
-        setAgentPerformance(agentRes.data.data);
-      }
-
-      const activityRes = await analyticsAPI.getRecentActivity({ limit: 10 });
-      setRecentActivity(activityRes.data.data);
-
-      const timeRes = await analyticsAPI.getLeadsOverTime({ period: 30 });
-      setLeadsOverTime(timeRes.data.data);
-
-      const tagsRes = await analyticsAPI.getTopTags({ limit: 10 });
-      setTopTags(tagsRes.data.data);
-
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:3001/api/dashboard/stats', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setStats(response.data);
     } catch (error) {
       toast.error('Failed to load dashboard data');
       console.error(error);
@@ -59,67 +37,92 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+
   if (loading) {
-    return <div className="dashboard-container">Loading...</div>;
+    return <div className="loading">Loading dashboard...</div>;
   }
-  
+
+  if (!stats) {
+    return <div className="error">Failed to load dashboard data</div>;
+  }
+
+  // Prepare data for charts
+  const statusDistributionData = stats.overview?.statusDistribution?.map(item => ({
+    status: item._id,
+    count: item.count
+  })) || [];
+
+  const leadsOverTimeData = stats.monthlyTrend?.map(item => ({
+    date: `${item._id.month}/${item._id.year}`,
+    count: item.count,
+    won: item.won
+  })) || [];
+
+  const topSourcesData = stats.overview?.leadsBySource?.slice(0, 5).map(item => ({
+    source: item._id || 'Unknown',
+    count: item.count
+  })) || [];
+
   return (
     <div className="dashboard-container">
       <h1>Dashboard</h1>
       <p className="welcome-text">Welcome back, {user?.name}!</p>
 
-      {/* Stats Cards */}
+      {/* Overview Cards */}
       <div className="stats-grid">
         <div className="stat-card">
-          <div className="stat-icon" style={{ backgroundColor: '#e3f2fd' }}>
-            <span style={{ color: '#1976d2' }}>📊</span>
+          <div className="stat-icon" style={{ background: '#3b82f6' }}>
+            <span>📊</span>
           </div>
           <div className="stat-content">
-            <h3>{stats?.totalLeads || 0}</h3>
-            <p>Total Leads</p>
+            <h3>Total Leads</h3>
+            <p className="stat-value">{stats.overview?.totalLeads || 0}</p>
           </div>
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ backgroundColor: '#e8f5e9' }}>
-            <span style={{ color: '#388e3c' }}>✓</span>
+          <div className="stat-icon" style={{ background: '#10b981' }}>
+            <span>📈</span>
           </div>
           <div className="stat-content">
-            <h3>{stats?.leadsByStatus?.Won || 0}</h3>
-            <p>Won Leads</p>
+            <h3>Recent Leads (30 days)</h3>
+            <p className="stat-value">{stats.overview?.recentLeadsCount || 0}</p>
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon" style={{ backgroundColor: '#fff3e0' }}>
-            <span style={{ color: '#f57c00' }}>📞</span>
-          </div>
-          <div className="stat-content">
-            <h3>{stats?.leadsByStatus?.Contacted || 0}</h3>
-            <p>Contacted</p>
-          </div>
-        </div>
+        {stats.userStats && (
+          <>
+            <div className="stat-card">
+              <div className="stat-icon" style={{ background: '#f59e0b' }}>
+                <span>👥</span>
+              </div>
+              <div className="stat-content">
+                <h3>Total Users</h3>
+                <p className="stat-value">{stats.userStats.total}</p>
+              </div>
+            </div>
 
-        <div className="stat-card">
-          <div className="stat-icon" style={{ backgroundColor: '#f3e5f5' }}>
-            <span style={{ color: '#7b1fa2' }}>%</span>
-          </div>
-          <div className="stat-content">
-            <h3>{stats?.conversionRate || 0}%</h3>
-            <p>Conversion Rate</p>
-          </div>
-        </div>
+            <div className="stat-card">
+              <div className="stat-icon" style={{ background: '#22c55e' }}>
+                <span>✓</span>
+              </div>
+              <div className="stat-content">
+                <h3>Active Users</h3>
+                <p className="stat-value">{stats.userStats.active}</p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Charts Grid */}
       <div className="charts-grid">
-
         <div className="card chart-card">
           <h3>Lead Status Distribution</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={statusDistribution}
+                data={statusDistributionData}
                 dataKey="count"
                 nameKey="status"
                 cx="50%"
@@ -127,8 +130,8 @@ const Dashboard = () => {
                 outerRadius={100}
                 label
               >
-                {statusDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[entry.status]} />
+                {statusDistributionData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[entry.status] || '#6b7280'} />
                 ))}
               </Pie>
               <Tooltip />
@@ -138,25 +141,26 @@ const Dashboard = () => {
         </div>
 
         <div className="card chart-card">
-          <h3>Leads Over Time (Last 30 Days)</h3>
+          <h3>Leads Over Time (Last 6 Months)</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={leadsOverTime}>
+            <LineChart data={leadsOverTimeData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="count" stroke="#667eea" strokeWidth={2} />
+              <Line type="monotone" dataKey="count" stroke="#667eea" strokeWidth={2} name="Total" />
+              <Line type="monotone" dataKey="won" stroke="#22c55e" strokeWidth={2} name="Won" />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         <div className="card chart-card">
-          <h3>Top Tags</h3>
+          <h3>Top Lead Sources</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={topTags}>
+            <BarChart data={topSourcesData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="tag" />
+              <XAxis dataKey="source" />
               <YAxis />
               <Tooltip />
               <Legend />
@@ -164,49 +168,55 @@ const Dashboard = () => {
             </BarChart>
           </ResponsiveContainer>
         </div>
-
-        {isAdmin() && agentPerformance.length > 0 && (
-          <div className="card chart-card">
-            <h3>Agent Performance</h3>
-            <div className="agent-performance-list">
-              {agentPerformance.map((agent, index) => (
-                <div key={index} className="agent-performance-item">
-                  <div className="agent-info">
-                    <strong>{agent.agent.name}</strong>
-                    <span className="agent-email">{agent.agent.email}</span>
-                  </div>
-                  <div className="agent-stats">
-                    <span className="agent-leads">{agent.totalLeads} leads</span>
-                    <span className="agent-conversion">{agent.conversionRate}% conversion</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Recent Activity */}
-      <div className="card">
-        <h3>Recent Activity</h3>
-        <div className="activity-list">
-          {recentActivity.length === 0 ? (
-            <p className="no-data">No recent activity</p>
-          ) : (
-            recentActivity.map((activity, index) => (
-              <div key={index} className="activity-item">
-                
-                <div className="activity-content">
-                  <p className="activity-text">
-                    <strong>{activity.user?.name}</strong> {activity.details}
-                  </p>
+      {/* Recent Leads */}
+      <div className="dashboard-section">
+        <h2>Recent Leads</h2>
+        <div className="recent-leads">
+          {stats.recentLeads?.map((lead) => (
+            <div key={lead._id} className="recent-lead-item">
+              <div className="lead-info">
+                <h4>{lead.name}</h4>
+                <p>{lead.email}</p>
+                <p>{lead.phone}</p>
+              </div>
+              <div className="lead-meta">
+                <span className={`status-badge status-${lead.status?.toLowerCase()}`}>
+                  {lead.status}
+                </span>
+                <span className="lead-date">
+                  {new Date(lead.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent Activity Log */}
+      <div className="dashboard-section">
+        <h2>Recent Activity Log</h2>
+        <div className="activity-log">
+          {stats.recentActivities?.map((activity) => (
+            <div key={activity._id} className="activity-item">
+              <div className="activity-icon">
+                <i className="fas fa-circle"></i>
+              </div>
+              <div className="activity-content">
+                <p className="activity-action">{activity.action?.replace(/_/g, ' ')}</p>
+                <p className="activity-details">{activity.details}</p>
+                <div className="activity-meta">
+                  <span className="activity-user">
+                    {activity.user?.name || 'Unknown User'}
+                  </span>
                   <span className="activity-time">
                     {new Date(activity.createdAt).toLocaleString()}
                   </span>
                 </div>
               </div>
-            ))
-          )}
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -4,11 +4,10 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import LeadModal from './LeadModal';
 import LeadDetailModal from './LeadDetailModal';
-import * as XLSX from 'xlsx';
 import './LeadList.css';
 
 const LeadList = () => {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const [leads, setLeads] = useState([]);
   const [agents, setAgents] = useState([]);
   const [allTags, setAllTags] = useState([]);
@@ -35,7 +34,9 @@ const LeadList = () => {
     loadAllTags();
     if (isAdmin()) {
       loadAgents();
-    } }, [filters]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   const loadLeads = async () => {
     try {

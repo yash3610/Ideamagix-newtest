@@ -68,6 +68,17 @@
   font-size: 14px;
 }
 
+@media (max-width: 1024px) {
+  .navbar-menu {
+    gap: 20px;
+  }
+
+  .navbar-link {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+}
+
 @media (max-width: 768px) {
   .navbar-container {
     padding: 0 15px;
@@ -78,16 +89,44 @@
   }
 
   .navbar-menu {
-    gap: 15px;
+    gap: 10px;
   }
 
   .navbar-link {
-    font-size: 14px;
-    padding: 6px 10px;
+    font-size: 13px;
+    padding: 6px 8px;
   }
 
   .user-name,
   .user-role {
     display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    height: 55px;
+  }
+
+  .navbar-container {
+    padding: 0 10px;
+  }
+
+  .navbar-logo {
+    font-size: 14px;
+  }
+
+  .navbar-menu {
+    gap: 8px;
+  }
+
+  .navbar-link {
+    font-size: 12px;
+    padding: 5px 6px;
+  }
+
+  .logout-btn {
+    font-size: 12px;
+    padding: 6px 12px;
   }
 }

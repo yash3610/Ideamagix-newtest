@@ -75,10 +75,61 @@
   color: #333;
 }
 
+@media (max-width: 1024px) {
+  .user-list-container {
+    max-width: 95%;
+  }
+}
+
 @media (max-width: 768px) {
   .user-list-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
+  }
+
+  .user-list-header h1 {
+    font-size: 22px;
+  }
+
+  .table {
+    font-size: 12px;
+  }
+
+  .table th, .table td {
+    padding: 8px 5px;
+  }
+
+  .action-buttons button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-list-container {
+    padding: 10px;
+  }
+
+  .user-list-header h1 {
+    font-size: 18px;
+  }
+
+  .table {
+    font-size: 11px;
+  }
+
+  .table th, .table td {
+    padding: 6px 3px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .action-buttons button {
+    width: 100%;
+    margin-bottom: 5px;
   }
 }
