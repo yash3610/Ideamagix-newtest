@@ -1,0 +1,82 @@
+.user-list-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.user-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.badge-superadmin {
+  background-color: #f44336;
+  color: white;
+}
+
+.badge-subadmin {
+  background-color: #ff9800;
+  color: white;
+}
+
+.badge-agent {
+  background-color: #2196f3;
+  color: white;
+}
+
+.badge-active {
+  background-color: #4caf50;
+  color: white;
+}
+
+.badge-inactive {
+  background-color: #9e9e9e;
+  color: white;
+}
+
+.btn-warning {
+  background-color: #ff9800;
+  color: white;
+}
+
+.btn-warning:hover {
+  background-color: #f57c00;
+}
+
+.protected-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: #e8f5e9;
+  color: #388e3c;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.checkbox-label span {
+  font-weight: 500;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .user-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
