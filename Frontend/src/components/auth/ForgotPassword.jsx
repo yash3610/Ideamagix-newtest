@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 import './Auth.css';
 
 const ForgotPassword = () => {
@@ -14,7 +14,7 @@ const ForgotPassword = () => {
     setMessage({ text: '', type: '' });
 
     try {
-      const response = await axios.post('http://localhost:3001/api/auth/forgot-password', {
+      const response = await api.post('/auth/forgot-password', {
         email
       });
 
