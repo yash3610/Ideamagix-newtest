@@ -10,7 +10,7 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'superadmin',
+    role: 'subadmin', // default to subadmin
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -66,7 +66,6 @@ const Register = () => {
               onChange={handleChange}
               required
             >
-              <option value="superadmin">Super Admin</option>
               <option value="subadmin">Sub Admin</option>
               <option value="agent">Agent</option>
             </select>

@@ -16,11 +16,18 @@ exports.register = async (req, res) => {
 
     // Check if any users exist
     const userCount = await User.countDocuments();
-    
-    // First user must be superadmin
+
+    // Prevent creation of superadmin if one already exists
     let userRole = role || 'agent';
     if (userCount === 0) {
       userRole = 'superadmin';
+    } else {
+      if (role === 'superadmin') {
+        return res.status(403).json({
+          success: false,
+          message: 'Super Admin can only be created once.'
+        });
+      }
     }
 
     // Check if user already exists
@@ -46,7 +53,7 @@ exports.register = async (req, res) => {
       action: 'REGISTER',
       resource: 'user',
       resourceId: user._id,
-      details: 'Super admin account created',
+      details: userRole === 'superadmin' ? 'Super admin account created' : 'User account created',
       ipAddress: req.ip
     });
 
